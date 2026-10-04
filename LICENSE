@@ -1,21 +1,94 @@
-MIT License
+CEQU-Edit License
+Proprietary, source-available software. This is not an open source license.
 
-Copyright (c) 2026 CEQU-Edit contributors
+Copyright (c) 2026 CEQU Labs. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+"Software" means CEQU-Edit: its source code, documentation, design, user
+interface and name, in this repository and in any copy of it. "You" means the
+person or organisation using the Software.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Ownership
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+   The Software is developed by CEQU Labs and is, and will remain, the
+   property of CEQU Labs. Making the source code visible does not transfer any
+   ownership and does not make the Software open source. All rights not
+   expressly granted in this License are reserved by CEQU Labs.
+
+2. Permission to use
+
+   CEQU Labs grants you a free, non-exclusive, non-transferable, revocable
+   permission to download, install and use the Software, unmodified, on
+   computers you own or control, for personal or commercial work. This
+   includes editing and building websites and applications for yourself, your
+   employer or your clients. You may update the Software from the official
+   repository.
+
+3. Restrictions
+
+   Unless CEQU Labs gives you written permission, you may not:
+   a) copy the Software, except to install it and to keep backups for your
+      own use;
+   b) modify, adapt, translate or create derivative works of the Software;
+   c) distribute, publish, share, sublicense, sell, rent or lend the Software,
+      or offer it to others as a hosted or online service;
+   d) remove or change this License, copyright notices or the CEQU-Edit name;
+   e) rebrand the Software or present it as your own;
+   f) use the names "CEQU", "CEQU Labs" or "CEQU-Edit" to endorse or promote
+      any product or service.
+
+   Viewing or forking this repository on GitHub, as GitHub's Terms of Service
+   allow, gives you no rights beyond those in this License.
+
+4. Your work belongs to you
+
+   You keep all rights to the websites, applications, code and content you
+   create, edit or build with the Software ("Your Work"). CEQU Labs claims no
+   ownership of Your Work. You are responsible for Your Work, including
+   having the rights to the content, images and code you use in it.
+
+5. Third-party services and tools
+
+   The Software works with tools and services it does not include, such as
+   Node.js, git and Claude Code. They have their own licenses and terms. Your
+   use of Claude Code and your Claude account is governed by Anthropic's
+   terms, and you are responsible for that account and its usage.
+
+6. No warranty
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, ACCURACY AND NON-INFRINGEMENT. CEQU LABS
+   DOES NOT WARRANT THAT THE SOFTWARE, OR ANY CHANGE IT OR AN AI MODEL MAKES
+   TO YOUR FILES, WILL BE CORRECT, SECURE, ERROR-FREE OR UNINTERRUPTED.
+
+7. Limitation of liability
+
+   TO THE MAXIMUM EXTENT PERMITTED BY LAW, CEQU LABS AND ITS CONTRIBUTORS ARE
+   NOT LIABLE FOR ANY CLAIM, LOSS OR DAMAGES OF ANY KIND, WHETHER DIRECT,
+   INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR PUNITIVE, INCLUDING LOSS OF
+   DATA, FILES, PROFITS, REVENUE, BUSINESS OR GOODWILL, ARISING FROM OR
+   RELATED TO THE SOFTWARE, ITS USE OR INABILITY TO USE IT, ANY CHANGES IT
+   MAKES TO YOUR FILES, PROJECTS OR GIT REPOSITORIES, ANY WEBSITE OR
+   APPLICATION BUILT WITH IT, OR ANY THIRD-PARTY TOOL OR SERVICE IT USES, EVEN
+   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+   You are responsible for reviewing every change before you approve it,
+   for keeping backups of your work, and for anything you publish.
+
+8. Termination and changes
+
+   This permission ends automatically if you break any term of this License.
+   CEQU Labs may also end it, or change these terms for future versions, at
+   any time. When it ends, you must stop using the Software and delete your
+   copies. Sections 1, 3 (as to copies already made), 4, 6 and 7 continue to
+   apply after it ends.
+
+9. Earlier versions
+
+   Copies of the Software obtained before 4 October 2026 were offered under
+   the MIT License. This License applies to all later versions.
+
+10. Permission requests
+
+   To ask for permissions beyond this License, open an issue in the official
+   repository: https://github.com/kumarsatyamdhiman/cequ-edit

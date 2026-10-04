@@ -1,5 +1,7 @@
 # CEQU-Edit
 
+By **CEQU Labs**. Free to use; not open source (see [License](#license)).
+
 Point-and-click visual editing for the websites and web apps you build, powered by [Claude Code](https://claude.com/claude-code).
 
 Open your site in the browser, press **E**, and click any part of the page: a heading, a photo, a button. Say what should change (in any language), or use the built-in controls to swap a photo, pick a colour, edit text in place, align, resize or hide. Queue several changes, press **Edit ▸**, and Claude Code applies them to the right lines of your source code. You see a **Before / After** preview first, then **Approve** or **Reject**. Every approved change can be undone.
@@ -98,14 +100,13 @@ CEQU-Edit keeps a history of your changes with git, which is what makes the prev
 
 More in [`SKILL.md`](SKILL.md) and [`references/stacks.md`](references/stacks.md).
 
-## Development
-
-No dependencies to install. Run the tests (Node 22+):
-
-```bash
-cd tool && npm test
-```
-
 ## License
 
-[MIT](LICENSE)
+CEQU-Edit is proprietary software of **CEQU Labs**, made available free of charge under the [CEQU-Edit License](LICENSE). It is not open source.
+
+- **You may** install and use it, unmodified, for personal or commercial work, including websites and apps you build for clients.
+- **You own** everything you create with it. CEQU Labs claims no rights to your sites or apps.
+- **You may not** copy, modify, redistribute, sell, host or rebrand CEQU-Edit itself without written permission from CEQU Labs.
+- **No warranty, no liability:** it is provided as is. Review every change before you approve it, and keep backups.
+
+For other permissions, open an issue in this repository.
