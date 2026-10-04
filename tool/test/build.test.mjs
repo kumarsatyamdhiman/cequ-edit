@@ -1,5 +1,6 @@
 import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import { mkdtempSync, writeFileSync, readFileSync, existsSync, mkdirSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -9,8 +10,8 @@ import { createBuilder, serveFolder, outGuard } from '../build.mjs';
 import { createRunner, ensureRepo } from '../runner.mjs';
 import { loadConfig } from '../config.mjs';
 
-const fake = new URL('./fake-claude.mjs', import.meta.url).pathname;
-const fakeBuild = new URL('./fake-build.mjs', import.meta.url).pathname;
+const fake = fileURLToPath(new URL('./fake-claude.mjs', import.meta.url));
+const fakeBuild = fileURLToPath(new URL('./fake-build.mjs', import.meta.url));
 let site, home, runner, builder, events;
 
 async function makeSite({ app = true, build = `"${process.execPath}" "${fakeBuild}"`, out = 'dist', extra = {} } = {}) {
@@ -147,6 +148,7 @@ test('serveFolder: files, .html, folders, single-page fallback, 404 page, no esc
     assert.deepEqual(await get('/blog/'), [200, 'blog']);
     assert.deepEqual(await get('/dashboard/settings'), [200, 'home']);
     assert.deepEqual(await get('/missing.png'), [404, 'missing']);
-    assert.notEqual((await get('/..%2f..%2fetc/hosts'))[1], readFileSync('/etc/hosts', 'utf8'));
+    const [status, body] = await get('/..%2f..%2f..%2fpackage.json');
+    assert.ok(status === 404 || body === 'home', 'nothing outside the folder is served');
   } finally { await s.close(); }
 });

@@ -51,7 +51,7 @@ test('.cequ-edit.json overrides detection; guidance files are found', () => {
 
 test('each site gets its own runtime folder', () => {
   assert.notEqual(siteHome('/a/my site'), siteHome('/b/my site'));
-  assert.match(siteHome('/x/My Site'), /\.cequ-edit\/sites\/my-site-[0-9a-f]{8}$/);
+  assert.match(siteHome('/x/My Site'), /\.cequ-edit[\\/]sites[\\/]my-site-[0-9a-f]{8}$/);
 });
 
 test('app mode: the app block, start route and public uploads', async () => {

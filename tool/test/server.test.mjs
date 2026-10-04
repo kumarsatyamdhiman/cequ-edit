@@ -1,5 +1,6 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import http from 'node:http';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -8,7 +9,7 @@ import { deflateSync, crc32 } from 'node:zlib';
 import { startServer, cssIndex } from '../server.mjs';
 import { ensureRepo } from '../runner.mjs';
 
-const fake = new URL('./fake-claude.mjs', import.meta.url).pathname;
+const fake = fileURLToPath(new URL('./fake-claude.mjs', import.meta.url));
 const PAGE = '<!doctype html>\n<html><head><title>t</title></head><body>\n<h1 class="t">Old title</h1>\n<img src="assets/a.jpg" alt="a">\n</body></html>\n';
 const CSS = ':root {\n  --accent: oklch(0.62 0.19 45);\n}\n/* note { not a rule } */\n.t { color: var(--accent); }\n@media (max-width: 900px) {\n  .t { color: red; }\n}\n';
 let app, base, origin;

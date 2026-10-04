@@ -1,5 +1,6 @@
 import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import { mkdtempSync, writeFileSync, readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, delimiter } from 'node:path';
@@ -7,7 +8,7 @@ import { homedir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { createRunner, ensureRepo } from '../runner.mjs';
 
-const fake = new URL('./fake-claude.mjs', import.meta.url).pathname;
+const fake = fileURLToPath(new URL('./fake-claude.mjs', import.meta.url));
 const PAGE = '<!doctype html>\n<html><body>\n<h1>Old title</h1>\n<p>Keep me</p>\n</body></html>\n';
 let site, home, runner;
 

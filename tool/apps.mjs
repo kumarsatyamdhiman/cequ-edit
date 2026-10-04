@@ -38,7 +38,12 @@ export function killStale(home) {
   }
 }
 
-const startError = (message, logFile) => Object.assign(new Error(message), { log: tail(logFile, 30), logFile });
+// The message carries the app's last log line, the most likely explanation.
+const startError = (message, logFile) => {
+  const log = tail(logFile, 30);
+  const last = log.split('\n').filter(l => l.trim()).pop();
+  return Object.assign(new Error(last ? `${message} Last output: ${last.trim().slice(0, 300)}` : message), { log, logFile });
+};
 
 // Run `command` ({port} replaced, PORT set) in `cwd`; resolves once it answers HTTP on localhost.
 export async function startApp({ name, cwd, command, home, env = {}, readyMs = 120_000 }) {

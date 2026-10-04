@@ -1,5 +1,6 @@
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import { mkdtempSync, writeFileSync, readFileSync, existsSync, mkdirSync, symlinkSync, lstatSync, utimesSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -7,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { startApp, killStale, ensureCopy, freePort } from '../apps.mjs';
 import { ensureRepo } from '../runner.mjs';
 
-const fakeApp = new URL('./fake-app.mjs', import.meta.url).pathname;
+const fakeApp = fileURLToPath(new URL('./fake-app.mjs', import.meta.url));
 const cmd = `"${process.execPath}" "${fakeApp}" --port {port}`;
 const started = [];
 const home = () => mkdtempSync(join(tmpdir(), 'cequ-apps-home-'));

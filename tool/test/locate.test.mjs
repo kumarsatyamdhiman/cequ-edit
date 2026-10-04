@@ -31,7 +31,7 @@ test('normalising framework paths', () => {
   const o = { siteDir: site, roots: [join(home, 'preview')], stageRoot: join(home, 'stage') };
   assert.equal(normalizePath(join(site, 'src/components/Hero.jsx'), o), 'src/components/Hero.jsx');
   assert.equal(normalizePath('http://localhost:5173/src/components/Hero.jsx?t=123', o), 'src/components/Hero.jsx');
-  assert.equal(normalizePath(`/@fs${site}/src/components/Hero.jsx`, o), 'src/components/Hero.jsx');
+  assert.equal(normalizePath(`/@fs${site.startsWith('/') ? '' : '/'}${site.replace(/\\/g, '/')}/src/components/Hero.jsx`, o), 'src/components/Hero.jsx');
   assert.equal(normalizePath(join(home, 'preview', 'src/x.js'), o), 'src/x.js');
   assert.equal(normalizePath(join(home, 'stage', '7', 'src/x.js'), o), 'src/x.js');
   assert.equal(normalizePath('/projects/x/node_modules/react/index.js', o), null);

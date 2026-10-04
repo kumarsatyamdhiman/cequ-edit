@@ -1,5 +1,6 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -7,8 +8,8 @@ import { startServer } from '../server.mjs';
 import { ensureRepo } from '../runner.mjs';
 import { loadConfig } from '../config.mjs';
 
-const fake = new URL('./fake-claude.mjs', import.meta.url).pathname;
-const fakeApp = new URL('./fake-app.mjs', import.meta.url).pathname;
+const fake = fileURLToPath(new URL('./fake-claude.mjs', import.meta.url));
+const fakeApp = fileURLToPath(new URL('./fake-app.mjs', import.meta.url));
 const PAGE = '<!doctype html>\n<html><head><title>App</title></head><body><h1 class="hero">Welcome back</h1></body></html>\n';
 let app, base, site;
 

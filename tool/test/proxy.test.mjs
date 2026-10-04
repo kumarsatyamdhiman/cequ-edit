@@ -1,5 +1,6 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import http from 'node:http';
 import net from 'node:net';
 import { mkdtempSync } from 'node:fs';
@@ -8,7 +9,7 @@ import { join } from 'node:path';
 import { createProxy, injectAfterHead, wantsDocument, rewriteLocation } from '../proxy.mjs';
 import { startApp } from '../apps.mjs';
 
-const fakeApp = new URL('./fake-app.mjs', import.meta.url).pathname;
+const fakeApp = fileURLToPath(new URL('./fake-app.mjs', import.meta.url));
 const TAG = '<script>INJECTED</script>';
 let app, server, base, upOn = true;
 
