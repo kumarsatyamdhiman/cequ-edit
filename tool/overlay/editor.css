@@ -1,0 +1,253 @@
+/* CEQU-Edit overlay UI. Loaded inside the <cequ-edit> shadow root, so site CSS cannot reach it and it cannot reach the site.
+   Rules for the page itself (edit-mode freeze, in-place typing) live in page.css. */
+#cequ-root {
+  --ed-bg: oklch(0.21 0.015 50);
+  --ed-bg-2: oklch(0.26 0.018 50);
+  --ed-bg-3: oklch(0.31 0.02 50);
+  --ed-fg: oklch(0.95 0.012 80);
+  --ed-fg-2: oklch(0.78 0.015 70);
+  --ed-line: oklch(0.95 0.012 80 / .14);
+  --ed-accent: oklch(0.76 0.165 60);
+  --ed-accent-ink: oklch(0.25 0.04 40);
+  --ed-ok: oklch(0.72 0.15 150);
+  --ed-bad: oklch(0.68 0.18 25);
+  --ed-ease: cubic-bezier(.16, 1, .3, 1);
+  font: 400 14px/1.45 system-ui, -apple-system, sans-serif;
+  color: var(--ed-fg);
+}
+#cequ-root *, #cequ-root *::before, #cequ-root *::after { box-sizing: border-box; }
+#cequ-root button { font: inherit; color: inherit; cursor: pointer; }
+#cequ-root button:disabled { opacity: .5; cursor: default; }
+#cequ-root :focus-visible { outline: 2px solid var(--ed-accent); outline-offset: 2px; }
+#cequ-root p, #cequ-root ol, #cequ-root ul, #cequ-root figure { margin: 0; }
+#cequ-root [hidden] { display: none !important; }
+
+/* ---------- hover / selection boxes ---------- */
+.cequ-box { position: fixed; left: 0; top: 0; z-index: 2147483000; display: none; pointer-events: none; border-radius: 3px; }
+.cequ-hl { outline: 2px solid oklch(0.76 0.165 60 / .9); background: oklch(0.76 0.165 60 / .08); }
+.cequ-sel { outline: 3px solid oklch(0.76 0.165 60); box-shadow: 0 0 0 9999px oklch(0.15 0.01 50 / .18); }
+.cequ-chip {
+  position: fixed; left: 0; top: 0; z-index: 2147483001; display: none; pointer-events: none; max-width: 60vw;
+  padding: 2px 8px; border-radius: 4px; background: var(--ed-accent); color: var(--ed-accent-ink);
+  font: 600 12px/20px system-ui, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ---------- toggle ---------- */
+.cequ-toggle {
+  position: fixed; left: 16px; bottom: 16px; z-index: 2147483002;
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px 9px 12px;
+  border: 1px solid var(--ed-line); border-radius: 999px; background: var(--ed-bg); color: var(--ed-fg);
+  box-shadow: 0 10px 30px -10px oklch(0.1 0.01 50 / .6);
+  transition: background-color .3s var(--ed-ease), color .3s var(--ed-ease);
+}
+.cequ-toggle span { font-size: 16px; }
+.cequ-toggle kbd { padding: 0 6px; border: 1px solid var(--ed-line); border-radius: 4px; font: 600 11px/18px system-ui; color: var(--ed-fg-2); }
+.cequ-toggle.is-on { background: var(--ed-accent); color: var(--ed-accent-ink); }
+.cequ-toggle.is-on kbd { color: var(--ed-accent-ink); border-color: oklch(0.25 0.04 40 / .3); }
+
+/* ---------- shared controls ---------- */
+.cequ-btn {
+  min-height: 34px; padding: 6px 14px; border: 1px solid var(--ed-line); border-radius: 8px;
+  background: var(--ed-bg-2); transition: background-color .2s var(--ed-ease), border-color .2s var(--ed-ease);
+}
+.cequ-btn:hover:not(:disabled) { background: var(--ed-bg-3); }
+.cequ-primary { background: var(--ed-accent) !important; border-color: var(--ed-accent) !important; color: var(--ed-accent-ink) !important; font-weight: 600 !important; }
+.cequ-link { padding: 4px 6px; border: 0; background: none; color: var(--ed-fg-2); text-decoration: underline; text-underline-offset: 3px; }
+.cequ-x { width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: var(--ed-fg-2); font-size: 18px; line-height: 1; }
+.cequ-x:hover { background: var(--ed-bg-3); color: var(--ed-fg); }
+.cequ-seg { display: inline-flex; padding: 3px; border-radius: 9px; background: var(--ed-bg-3); }
+.cequ-seg button { padding: 4px 12px; border: 0; border-radius: 7px; background: transparent; color: var(--ed-fg-2); }
+.cequ-seg button.is-on { background: var(--ed-accent); color: var(--ed-accent-ink); font-weight: 600; }
+.cequ-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+.cequ-hint, .cequ-empty { color: var(--ed-fg-2); }
+.cequ-badge { padding: 1px 8px; border-radius: 999px; background: var(--ed-bg-3); font-size: 12px; }
+.cequ-badge.is-READY, .cequ-badge.is-APPROVED { background: var(--ed-ok); color: oklch(0.2 0.03 150); }
+.cequ-badge.is-FAILED { background: var(--ed-bad); color: oklch(0.98 0.01 30); }
+.cequ-badge.is-NEEDS_INPUT { background: var(--ed-accent); color: var(--ed-accent-ink); }
+.cequ-spin { width: 14px; height: 14px; border: 2px solid var(--ed-line); border-top-color: var(--ed-accent); border-radius: 50%; animation: cequ-spin .8s linear infinite; }
+@keyframes cequ-spin { to { rotate: 360deg; } }
+
+/* ---------- dialog ---------- */
+.cequ-dialog {
+  position: fixed; z-index: 2147483003; width: min(420px, calc(100vw - 16px)); max-height: calc(100vh - 16px); overflow: auto;
+  border: 1px solid var(--ed-line); border-radius: 14px; background: var(--ed-bg);
+  box-shadow: 0 24px 60px -18px oklch(0.1 0.01 50 / .7);
+}
+.cequ-dh { display: flex; justify-content: space-between; gap: 10px; padding: 12px 12px 10px 16px; border-bottom: 1px solid var(--ed-line); cursor: grab; }
+.cequ-dh > div:first-child { min-width: 0; }
+.cequ-dh b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cequ-dh small { display: block; color: var(--ed-fg-2); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cequ-nav { display: flex; gap: 2px; flex: none; }
+.cequ-nav button { width: 30px; height: 30px; border: 0; border-radius: 7px; background: var(--ed-bg-2); }
+.cequ-nav button:hover { background: var(--ed-bg-3); }
+.cequ-note { margin: 10px 16px 0 !important; padding: 6px 10px; border-radius: 8px; background: var(--ed-bg-2); color: var(--ed-fg-2); font-size: 13px; }
+.cequ-screens { display: flex; align-items: center; gap: 4px; padding: 12px 16px 0; color: var(--ed-fg-2); font-size: 13px; }
+.cequ-screens button { margin-left: 4px; padding: 3px 10px; border: 1px solid var(--ed-line); border-radius: 999px; background: none; color: var(--ed-fg); font-size: 13px; }
+.cequ-screens button.is-on { background: var(--ed-accent); border-color: var(--ed-accent); color: var(--ed-accent-ink); font-weight: 600; }
+.cequ-screens small { margin-left: auto; font-size: 12px; }
+.cequ-instr, #cequ-root textarea, #cequ-root input[type="text"] {
+  display: block; width: 100%; padding: 9px 11px; border: 1px solid var(--ed-line); border-radius: 9px;
+  background: var(--ed-bg-2); color: var(--ed-fg); font: 400 15px/1.5 system-ui, sans-serif; resize: vertical;
+}
+.cequ-instr { width: calc(100% - 32px); margin: 10px 16px 0; }
+.cequ-tabs { display: flex; gap: 2px; margin: 12px 16px 0; padding: 3px; border-radius: 10px; background: var(--ed-bg-2); }
+.cequ-tabs button { flex: 1; padding: 6px 4px; border: 0; border-radius: 8px; background: none; color: var(--ed-fg-2); font-size: 13px; position: relative; }
+.cequ-tabs button.is-on { background: var(--ed-bg-3); color: var(--ed-fg); font-weight: 600; }
+.cequ-tabs button.has-value::after { content: ""; position: absolute; top: 5px; right: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--ed-accent); }
+.cequ-tab { display: grid; gap: 10px; padding: 12px 16px 4px; }
+.cequ-df { display: flex; align-items: center; gap: 8px; padding: 12px 16px 14px; }
+.cequ-err { flex: 1; color: var(--ed-bad); font-size: 13px; }
+
+/* photo */
+.cequ-swap { display: grid; grid-template-columns: 96px 18px 1fr; align-items: center; gap: 6px; }
+.cequ-swap figure img { width: 96px; height: 72px; object-fit: cover; border-radius: 6px; }
+.cequ-swap figcaption { color: var(--ed-fg-2); font-size: 11px; }
+.cequ-swap .cequ-hint { grid-column: 1 / 3; font-size: 12px; }
+.cequ-arrow { color: var(--ed-fg-2); text-align: center; }
+.cequ-drop {
+  display: grid; place-content: center; gap: 4px; min-height: 96px; padding: 10px; text-align: center;
+  border: 1.5px dashed var(--ed-line); border-radius: 10px; color: var(--ed-fg-2); cursor: pointer; font-size: 13px;
+}
+.cequ-drop small { font-size: 11px; }
+.cequ-drop.is-over, .cequ-drop:hover { border-color: var(--ed-accent); color: var(--ed-fg); }
+.cequ-drop.is-busy { cursor: progress; border-style: solid; }
+.cequ-focal { position: relative; cursor: crosshair; line-height: 0; }
+.cequ-focal img { width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; }
+.cequ-focal i { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border: 2px solid #fff8; border-radius: 50%; background: var(--ed-accent); box-shadow: 0 0 0 2px oklch(0.2 0.02 50 / .6); pointer-events: none; }
+.cequ-newimg small { color: var(--ed-fg-2); font-size: 12px; }
+.cequ-field { display: grid; gap: 4px; color: var(--ed-fg-2); font-size: 13px; }
+.cequ-radios { display: grid; gap: 4px; margin: 0; padding: 8px 10px; border: 1px solid var(--ed-line); border-radius: 10px; }
+.cequ-radios legend { padding: 0 4px; color: var(--ed-fg-2); font-size: 12px; }
+.cequ-radio { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.cequ-radio input { accent-color: oklch(0.76 0.165 60); }
+
+/* colour */
+.cequ-colorrow { display: grid; grid-template-columns: 22px 74px 1fr 30px 24px; align-items: center; gap: 6px; }
+.cequ-colorrow b { font-weight: 500; font-size: 13px; }
+.cequ-tokens { display: flex; flex-wrap: wrap; gap: 4px; }
+.cequ-sw { width: 20px; height: 20px; padding: 0; border: 1px solid oklch(0.95 0.012 80 / .3); border-radius: 50%; }
+.cequ-sw--now { border-radius: 5px; }
+.cequ-sw.is-on { outline: 2px solid var(--ed-fg); outline-offset: 2px; }
+.cequ-colorrow input[type="color"] { width: 30px; height: 24px; padding: 0; border: 1px solid var(--ed-line); border-radius: 6px; background: none; }
+.cequ-contrast { font-size: 13px; color: var(--ed-ok); }
+.cequ-contrast.is-bad { color: var(--ed-bad); }
+
+/* text */
+.cequ-textnew { padding: 8px 10px; border-radius: 9px; background: var(--ed-bg-2); }
+.cequ-textnew small { color: var(--ed-fg-2); font-size: 11px; }
+
+/* ---------- drawer ---------- */
+.cequ-drawer {
+  position: fixed; right: 16px; bottom: 16px; z-index: 2147483002; display: none;
+  width: min(360px, calc(100vw - 32px)); max-height: min(70vh, 640px); overflow: auto;
+  border: 1px solid var(--ed-line); border-radius: 14px; background: var(--ed-bg);
+  box-shadow: 0 24px 60px -18px oklch(0.1 0.01 50 / .7);
+}
+.cequ-drawer.is-shown { display: block; }
+.cequ-drawer > header { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 10px 10px 10px 12px; background: var(--ed-bg); border-bottom: 1px solid var(--ed-line); }
+.cequ-drawer.is-min > :not(header) { display: none; }
+.cequ-q, .cequ-h { padding: 10px 12px 12px; }
+.cequ-list { display: grid; gap: 6px; padding: 0; list-style: none; }
+.cequ-list li { display: grid; grid-template-columns: 26px 1fr auto 28px; align-items: center; gap: 8px; padding: 6px; border-radius: 10px; background: var(--ed-bg-2); }
+.cequ-num, .cequ-pin, .cequ-changed {
+  display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--ed-accent); color: var(--ed-accent-ink); font: 700 12px/1 system-ui; border: 0;
+}
+.cequ-sum { min-width: 0; padding: 0; border: 0; background: none; text-align: left; }
+.cequ-sum b { display: block; font-size: 12px; font-weight: 600; color: var(--ed-fg-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cequ-sum span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13px; }
+.cequ-thumb { width: 40px; height: 30px; object-fit: cover; border-radius: 4px; }
+.cequ-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.cequ-pins { position: fixed; inset: 0; z-index: 2147482999; pointer-events: none; }
+.cequ-pin, .cequ-changed { position: fixed; left: 0; top: 0; z-index: 2147482999; pointer-events: none; box-shadow: 0 2px 8px oklch(0.1 0.01 50 / .5); }
+.cequ-changed { background: var(--ed-ok); color: oklch(0.2 0.03 150); }
+#cequ-root:not(.is-editing) .cequ-pins { display: none; }
+
+/* run status */
+.cequ-run { display: grid; gap: 8px; margin: 10px 12px 0; padding: 10px 12px; border: 1px solid var(--ed-line); border-radius: 12px; background: var(--ed-bg-2); }
+.cequ-run > header { display: flex; align-items: center; gap: 8px; }
+.cequ-log { display: grid; gap: 2px; padding-left: 16px; color: var(--ed-fg-2); font-size: 12px; }
+.cequ-log li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cequ-results { display: grid; gap: 4px; padding: 0; list-style: none; font-size: 13px; }
+.cequ-results .is-done b { color: var(--ed-ok); }
+.cequ-results .is-needs_input b { color: var(--ed-accent); }
+.cequ-results .is-failed b { color: var(--ed-bad); }
+.cequ-question p, .cequ-failed p { margin-bottom: 6px; }
+.cequ-failed small, .cequ-question small { color: var(--ed-fg-2); }
+.cequ-handoff code { display: block; margin: 6px 0; padding: 8px; border-radius: 8px; background: var(--ed-bg); font: 12px/1.4 ui-monospace, Menlo, monospace; word-break: break-all; }
+.cequ-hist { display: grid; gap: 6px; padding: 0; list-style: none; }
+.cequ-hist li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px; border-radius: 10px; background: var(--ed-bg-2); }
+.cequ-hist b { display: block; font-size: 13px; font-weight: 500; }
+.cequ-hist small { color: var(--ed-fg-2); font-size: 11px; }
+
+/* ---------- preview bar ---------- */
+.cequ-pbar {
+  position: fixed; left: 50%; bottom: 16px; translate: -50% 0; z-index: 2147483002;
+  display: flex; align-items: center; gap: 8px; width: min(860px, calc(100vw - 32px)); padding: 8px 8px 8px 16px;
+  border: 1px solid var(--ed-line); border-radius: 14px; background: var(--ed-bg);
+  box-shadow: 0 24px 60px -18px oklch(0.1 0.01 50 / .7);
+}
+.cequ-grow { flex: 1; }
+#cequ-root:has(.cequ-pbar) .cequ-drawer { bottom: 84px; }
+#cequ-root:has(.cequ-pbar) .cequ-toggle { bottom: 84px; }
+
+/* ---------- modal, diff, phone ---------- */
+.cequ-modal { position: fixed; inset: 0; z-index: 2147483004; display: grid; place-items: center; padding: 24px; background: oklch(0.1 0.01 50 / .6); }
+.cequ-modalbox { display: flex; flex-direction: column; max-width: min(1000px, 100%); max-height: 100%; overflow: hidden; border: 1px solid var(--ed-line); border-radius: 14px; background: var(--ed-bg); }
+.cequ-modalbox > header { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px 10px 16px; border-bottom: 1px solid var(--ed-line); }
+.cequ-modalbox > header button { border: 0; background: none; font-size: 18px; }
+.cequ-diff { margin: 0; padding: 12px 16px; overflow: auto; font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; word-break: break-word; }
+.cequ-diff .is-add { color: oklch(0.82 0.13 150); background: oklch(0.72 0.15 150 / .12); }
+.cequ-diff .is-del { color: oklch(0.8 0.12 25); background: oklch(0.68 0.18 25 / .12); }
+.cequ-diff .is-hunk { color: oklch(0.75 0.1 250); }
+.cequ-diff .is-file { color: var(--ed-accent); font-weight: 700; }
+.cequ-phone { display: block; width: 390px; max-width: 100%; height: min(844px, calc(100vh - 120px)); border: 0; background: #fff; }
+
+/* ---------- toasts ---------- */
+.cequ-toast {
+  position: fixed; left: 50%; top: 16px; translate: -50% 0; z-index: 2147483005; display: grid; gap: 2px;
+  max-width: min(560px, calc(100vw - 32px)); padding: 10px 16px; border-radius: 12px; background: var(--ed-bg); color: var(--ed-fg);
+  border: 1px solid var(--ed-line); box-shadow: 0 16px 40px -14px oklch(0.1 0.01 50 / .7);
+  transition: opacity .4s var(--ed-ease), translate .4s var(--ed-ease);
+}
+.cequ-toast small { color: var(--ed-fg-2); }
+.cequ-toast--ok { border-color: var(--ed-ok); }
+.cequ-toast--error { border-color: var(--ed-bad); }
+.cequ-toast.cequ-out { opacity: 0; translate: -50% -8px; }
+
+@media (max-width: 700px) {
+  .cequ-drawer { left: 8px; right: 8px; width: auto; bottom: 64px; }
+  .cequ-pbar { flex-wrap: wrap; bottom: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #cequ-root *, #cequ-root *::before, #cequ-root *::after { transition-duration: .01s !important; animation-duration: .01s !important; }
+}
+.cequ-manual { justify-self: start; font-size: 12px; }
+.cequ-cmd { display: block; margin: 4px 0; padding: 6px 8px; border-radius: 6px; background: var(--ed-bg-2); font: 12px/1.4 ui-monospace, Menlo, monospace; }
+
+/* layout tab + instant/Claude routing */
+.cequ-segrow { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.cequ-segrow button { padding: 4px 10px; border: 1px solid var(--ed-line); border-radius: 7px; background: var(--ed-bg-2); color: var(--ed-fg-2); font-size: 13px; }
+.cequ-segrow button.is-on { background: var(--ed-accent); border-color: var(--ed-accent); color: var(--ed-accent-ink); font-weight: 600; }
+.cequ-field { display: grid; gap: 2px; color: var(--ed-fg-2); font-size: 13px; }
+.cequ-route { margin: 6px 16px 0 !important; padding: 6px 10px; border-radius: 8px; font-size: 12.5px; }
+.cequ-route:empty { display: none; }
+.cequ-route.is-instant { background: oklch(0.72 0.15 150 / .14); color: oklch(0.85 0.12 150); }
+.cequ-route.is-claude { background: oklch(0.76 0.165 60 / .14); color: oklch(0.86 0.12 70); }
+.cequ-way { font-style: normal; }
+.cequ-way.is-instant { color: oklch(0.8 0.15 150); }
+.cequ-way.is-claude { color: var(--ed-accent); }
+.cequ-split { color: var(--ed-fg-2); font-size: 12px; }
+
+/* ---------- where the code is (app projects) ---------- */
+.cequ-where { margin: 0 16px; padding: 6px 10px; border-radius: 8px; background: var(--ed-bg-2); color: var(--ed-fg-2); font-size: 12.5px; }
+.cequ-where code { font: 12px/1.4 ui-monospace, Menlo, monospace; color: var(--ed-fg); word-break: break-all; }
+.cequ-where summary { cursor: pointer; }
+.cequ-where ol { margin: 4px 0 0; padding-left: 18px; }
+
+/* ---------- build final site ---------- */
+.cequ-build { display: grid; gap: 8px; margin: 10px 12px 0; padding: 10px 12px; border: 1px solid var(--ed-line); border-radius: 12px; background: var(--ed-bg-2); }
+.cequ-build > header { display: flex; align-items: center; gap: 8px; }
+.cequ-build pre { max-height: 220px; margin: 0; padding: 8px; overflow: auto; border-radius: 8px; background: var(--ed-bg); font: 11.5px/1.45 ui-monospace, Menlo, monospace; white-space: pre-wrap; }
+.cequ-buildbtn { margin: 10px 12px 0; width: calc(100% - 24px); }
+.cequ-pbar .cequ-err { color: var(--ed-bad); font-size: 12.5px; }

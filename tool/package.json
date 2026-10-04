@@ -1,0 +1,13 @@
+{
+  "name": "cequ-edit",
+  "private": true,
+  "type": "module",
+  "description": "CEQU-Edit: point-and-click visual editing for websites and web apps, applied by Claude Code on your Claude subscription",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

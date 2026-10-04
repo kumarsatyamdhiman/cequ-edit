@@ -1,0 +1,14 @@
+/* CEQU-Edit: rules for the page being edited (the editor UI itself lives in the <cequ-edit> shadow root).
+   While edit mode is on, every animation jumps to its end state and transitions are instant, so what you see holds still.
+   Site-specific extras (hide a custom cursor, show scroll-revealed content…) go in .cequ-edit.json → editModeCss. */
+html.cequ-editing { scroll-behavior: auto !important; }
+html.cequ-editing body *:not(cequ-edit),
+html.cequ-editing body *:not(cequ-edit)::before,
+html.cequ-editing body *:not(cequ-edit)::after {
+  transition-duration: 0s !important; transition-delay: 0s !important;
+  animation-duration: 0s !important; animation-delay: 0s !important; animation-iteration-count: 1 !important;
+}
+html.cequ-editing, html.cequ-editing body, html.cequ-editing body *:not(cequ-edit) { cursor: crosshair !important; }
+html.cequ-editing .cequ-typing, html.cequ-editing .cequ-typing * { cursor: text !important; }
+.cequ-typing { outline: 2px dashed oklch(0.76 0.165 60) !important; outline-offset: 4px; background: oklch(0.76 0.165 60 / .12) !important; }
+cequ-edit { display: contents; }
