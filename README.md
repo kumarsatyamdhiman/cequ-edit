@@ -31,14 +31,14 @@ It runs on **macOS, Linux and Windows**, in any browser (Chrome, Safari, Firefox
 macOS / Linux:
 
 ```bash
-git clone https://github.com/YOUR-GITHUB-NAME/cequ-edit ~/.claude/skills/cequ-edit
+git clone https://github.com/kumarsatyamdhiman/cequ-edit ~/.claude/skills/cequ-edit
 node ~/.claude/skills/cequ-edit/tool/cequ.mjs --install
 ```
 
 Windows (PowerShell):
 
 ```powershell
-git clone https://github.com/YOUR-GITHUB-NAME/cequ-edit "$HOME\.claude\skills\cequ-edit"
+git clone https://github.com/kumarsatyamdhiman/cequ-edit "$HOME\.claude\skills\cequ-edit"
 node "$HOME\.claude\skills\cequ-edit\tool\cequ.mjs" --install
 ```
 
