@@ -7,6 +7,7 @@ import { readFile, writeFile, rm, mkdir, copyFile } from 'node:fs/promises';
 import { join, basename, relative, isAbsolute, delimiter } from 'node:path';
 import { homedir } from 'node:os';
 import { applyDirect } from './direct.mjs';
+import { killTree } from './platform.mjs';
 
 const exec = promisify(execFile);
 export const BATCH_FILE = '.cequ-batch.json';
@@ -17,6 +18,8 @@ const ACTIVE = new Set(['STAGING', 'RUNNING']);
 // Windows: `claude` may be claude.cmd (npm install), which only starts through the shell. Only flags are passed
 // as arguments (the prompt goes in on stdin), so nothing needs quoting.
 const WIN = process.platform === 'win32';
+// Through cmd.exe a missing program is an exit code plus this message, not ENOENT.
+const NOT_FOUND = /is not recognized as an internal or external command|cannot find the path specified/i;
 
 const fail = (status, message, extra = {}) => Object.assign(new Error(message), { status, ...extra });
 
@@ -51,6 +54,7 @@ export async function ensureRepo(siteDir, { app = false, maxFiles = 20_000, maxB
   if (missing.length) writeFileSync(ignore, current + (current && !current.endsWith('\n') ? '\n' : '') + missing.join('\n') + '\n');
   if (fresh) {
     await git(siteDir, 'init', '-q', '-b', MAIN);
+    await git(siteDir, 'config', 'core.autocrlf', 'false');      // keep files byte-identical on Windows (undo, previews)
     const files = (await git(siteDir, 'ls-files', '--others', '--exclude-standard', '-z')).split('\0').filter(Boolean);
     let bytes = 0;
     for (const f of files) { try { bytes += statSync(join(siteDir, f)).size; } catch { /* vanished */ } }
@@ -120,7 +124,7 @@ export async function subscriptionCheck(claude, env) {
     }
     return { ok: true };
   } catch (e) {
-    if (e.code === 'ENOENT') return { ok: false, missing: true };
+    if (e.code === 'ENOENT' || NOT_FOUND.test(e.stderr || '')) return { ok: false, missing: true };
     return { ok: false, why: 'unable to report its sign-in' };
   }
 }
@@ -343,14 +347,14 @@ export function createRunner({ siteDir, home, claude = ['claude'], timeoutMs = 1
     child.stdin.end(text);
     procs.set(b.id, child);
     let buf = '', errTail = '', spawnError = null, timedOut = false;
-    const timer = setTimeout(() => { timedOut = true; child.kill('SIGTERM'); }, timeoutMs);
+    const timer = setTimeout(() => { timedOut = true; killTree(child.pid, true); }, timeoutMs);
     child.on('error', e => { spawnError = e.code || e.message; });
     child.stdout.on('data', d => {
       log.write(d);
       buf += d;
       for (let i; (i = buf.indexOf('\n')) >= 0;) { onStreamLine(b, buf.slice(0, i)); buf = buf.slice(i + 1); }
     });
-    child.stderr.on('data', d => { log.write(d); errTail = (errTail + d).slice(-2000); });
+    child.stderr.on('data', d => { log.write(d); errTail = (errTail + d).slice(-2000); if (NOT_FOUND.test(errTail)) spawnError = 'ENOENT'; });
     child.on('close', async () => {
       clearTimeout(timer);
       procs.delete(b.id);
@@ -507,7 +511,7 @@ export function createRunner({ siteDir, home, claude = ['claude'], timeoutMs = 1
     clearInterval(watchers.get(b.id));
     const child = procs.get(b.id);
     setStatus(b, 'REJECTED', { previewUrl: null });
-    if (child) child.kill('SIGTERM');
+    if (child) killTree(child.pid, true);
     await cleanup(b);
     emit(b.id, 'rejected');
     return view(b);
@@ -557,7 +561,7 @@ export function createRunner({ siteDir, home, claude = ['claude'], timeoutMs = 1
 
   function close() {
     for (const t of watchers.values()) clearInterval(t);
-    for (const c of procs.values()) c.kill('SIGTERM');
+    for (const c of procs.values()) killTree(c.pid, true);
   }
 
   return Object.assign(ev, {
